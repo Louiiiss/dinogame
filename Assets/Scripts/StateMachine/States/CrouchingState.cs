@@ -7,7 +7,7 @@ public class CrouchingState : State
 	public override void Enter()
 	{
 		base.Enter();
-		Player.CorrectFacingDirection();
+		//Player.CorrectFacingDirection();
 	}
 
 	public override void DoFixedUpdate()

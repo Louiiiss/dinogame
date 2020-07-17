@@ -49,6 +49,7 @@ public class PlayerController : MonoBehaviour
 	public delegate void UIUpdateAction();
 	public event UIUpdateAction TriggerUIUpdate;
 
+	private Transform CharacterFrameContainer;
 
 	public StateMachine.StateInfo[] _states;
 	private StateMachine _stateMachine;
@@ -79,6 +80,7 @@ public class PlayerController : MonoBehaviour
 
 	private void Start()
 	{
+		CharacterFrameContainer = this.transform.parent;
 		_facingDirection = Direction.Right;
 		CorrectFacingDirection();
 		InitialiseStateMachine();
@@ -86,7 +88,7 @@ public class PlayerController : MonoBehaviour
 		GetGenericInformation();
 		_playerAnimator.SetFloat("Speed", _currentSpeed);
 
-		_rigidbody = this.GetComponent<Rigidbody>();
+		_rigidbody = CharacterFrameContainer.GetComponent<Rigidbody>();
 
 		InitialisePlayerStats();
 	}
@@ -131,16 +133,17 @@ public class PlayerController : MonoBehaviour
 	public void CorrectFacingDirection()
 	{
 		Vector3 correctedDirection;
+		float frame_rotation = CharacterFrameContainer.rotation.y;
 		if (_facingDirection == Direction.Left)
 		{
-			correctedDirection = new Vector3(_currentRotation.x, -90, _currentRotation.z);
+			correctedDirection = new Vector3(_currentRotation.x, -180, _currentRotation.z);
 }
 		else
 		{
-			correctedDirection = new Vector3(_currentRotation.x, 90, _currentRotation.z);
+			correctedDirection = new Vector3(_currentRotation.x, 0, _currentRotation.z);
 		}
 
-		this.transform.rotation = Quaternion.Euler(correctedDirection);
+		this.transform.localRotation = Quaternion.Euler(correctedDirection);
 
 	}
 
@@ -151,7 +154,7 @@ public class PlayerController : MonoBehaviour
 		_currentSpeed = speed;
 		_playerAnimator.SetFloat("Speed", Mathf.Abs(_currentSpeed));
 		_currentPostion = this.transform.position;
-		Vector3 newPosition = _currentPostion + new Vector3(_currentSpeed * Time.fixedDeltaTime, 0f, 0f);
+		Vector3 newPosition = _currentPostion + (CharacterFrameContainer.forward * _currentSpeed * Time.fixedDeltaTime); //_currentPostion + new Vector3(_currentSpeed * Time.fixedDeltaTime, 0f, 0f);
 		//this.transform.position = newPosition;
 		_rigidbody.MovePosition(newPosition);
 	}
@@ -315,9 +318,9 @@ public class PlayerController : MonoBehaviour
 
 		if ((_facingDirection == Direction.Right && _new_speed < 0) || (_facingDirection == Direction.Left && _new_speed > 0))
 		{
-			if (_new_speed != 0 && _stateMachine.CurrentState.name == StateMachine.StateName.Standing)
+			if (_new_speed != 0 && _stateMachine.CurrentState.name == StateMachine.StateName.Crouching)
 			{
-				_stateMachine.ChangeState(StateMachine.StateName.Turning);
+				_stateMachine.ChangeState(StateMachine.StateName.CrouchTurning);
 			}
 		}
 
