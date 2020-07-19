@@ -25,7 +25,7 @@ public class PlayerController : MonoBehaviour
 	[HideInInspector]
 	public Rigidbody _rigidbody;
 	[HideInInspector]
-	private Direction _facingDirection;
+	public Direction _facingDirection;
 
 
 	public float _maxHealth;
@@ -49,12 +49,13 @@ public class PlayerController : MonoBehaviour
 	public delegate void UIUpdateAction();
 	public event UIUpdateAction TriggerUIUpdate;
 
+	private bool _updateContainerRootMotion;
 	private Transform CharacterFrameContainer;
 
 	public StateMachine.StateInfo[] _states;
 	private StateMachine _stateMachine;
 
-	private enum Direction
+	public enum Direction
 	{
 		Left,
 		Right
@@ -422,4 +423,26 @@ public class PlayerController : MonoBehaviour
 	}
 
 	//private void OnColl
+
+	private void OnAnimatorMove()
+	{
+		if(_updateContainerRootMotion)
+		{
+			CharacterFrameContainer.position += _playerAnimator.deltaPosition;
+		}
+		else
+		{
+			_playerAnimator.ApplyBuiltinRootMotion();
+		}
+	}
+
+	public void EnableContainerRootMotion()
+	{
+		_updateContainerRootMotion = true;
+	}
+
+	public void DisableContainerRootMotion()
+	{
+		_updateContainerRootMotion = false;
+	}
 }

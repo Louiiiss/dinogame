@@ -9,11 +9,13 @@ public class AttackingState : State
 		base.Enter();
 		Player._playerAnimator.SetBool("Attacking", true);
 		Player.SetSpeed(0f);
+		Player.EnableContainerRootMotion();
 	}
 
 	public override void DoUpdate()
 	{
 		base.DoUpdate();
+		
 		if (Player._playerAnimator.GetBool("ReturnToIdle") == true)
 		{
 			Player._playerAnimator.SetBool("ReturnToIdle", false);
@@ -25,5 +27,6 @@ public class AttackingState : State
 	{
 		base.Exit();
 		Player._playerAnimator.SetBool("Attacking", false);
+		Player.DisableContainerRootMotion();
 	}
 }
