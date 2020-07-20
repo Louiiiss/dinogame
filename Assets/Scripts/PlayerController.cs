@@ -172,7 +172,7 @@ public class PlayerController : MonoBehaviour
 		_currentRotation = this.transform.rotation.eulerAngles;
 	}
 
-	public void GetMovementInput_Standing(bool aerial=false,bool restrictTurning=false)
+	public void GetMovementInput_Standing(bool restrictTurning=false)
 	{
 		_new_speed = _currentSpeed;
 		if (Input.GetKey(KeyCode.RightArrow))
@@ -186,21 +186,11 @@ public class PlayerController : MonoBehaviour
 				{
 					quickturnspeed = _quickTurnSpeed;
 				}
-				else if(aerial)
-				{
-					quickturnspeed = _aerialSpeed;
-				}
 			}
 
 			float speedUpperBound = _maxSpeed;
 			float speedLowerBound = -_maxSpeed;
 			
-			if (aerial)
-			{
-				speedUpperBound = _aerialSpeed;
-				speedLowerBound = -_aerialSpeed;
-				totalAcceleration = totalAcceleration * 2;
-			}
 			if (restrictTurning)
 			{
 				speedLowerBound = 0;
@@ -219,28 +209,18 @@ public class PlayerController : MonoBehaviour
 				{
 					quickturnspeed = _quickTurnSpeed;
 				}
-				else if (aerial)
-				{
-					quickturnspeed = _aerialSpeed;
-				}
 			}
 
 			float speedUpperBound = _maxSpeed;
 			float speedLowerBound = -_maxSpeed;
 
-			if (aerial)
-			{
-				speedUpperBound = _aerialSpeed;
-				speedLowerBound = -_aerialSpeed;
-				totalAcceleration = totalAcceleration * 2;
-			}
 			if (restrictTurning)
 			{
 				speedUpperBound = 0;
 			}
 			_new_speed = Mathf.Clamp((_currentSpeed - (totalAcceleration * Time.deltaTime)) - quickturnspeed, speedLowerBound, speedUpperBound);
 		}
-		else if ((aerial || restrictTurning) && !Input.GetKey(KeyCode.LeftArrow) && !Input.GetKey(KeyCode.RightArrow))
+		else if ((restrictTurning) && !Input.GetKey(KeyCode.LeftArrow) && !Input.GetKey(KeyCode.RightArrow))
 		{
 			_new_speed = 0f;
 		}
@@ -255,12 +235,84 @@ public class PlayerController : MonoBehaviour
 			}
 		}
 
-		if(Input.GetKeyDown(KeyCode.DownArrow))
+		if(Input.GetKey(KeyCode.DownArrow))
 		{
 			_stateMachine.ChangeState(StateMachine.StateName.CrouchingDown);
 		}
 
-		if ((_facingDirection == Direction.Right && _new_speed < 0) || (_facingDirection == Direction.Left && _new_speed > 0))
+		if (!restrictTurning && ((_facingDirection == Direction.Right && _new_speed < 0) || (_facingDirection == Direction.Left && _new_speed > 0)))
+		{
+			if (_new_speed != 0 && _stateMachine.CurrentState.name == StateMachine.StateName.Standing)
+			{
+				_stateMachine.ChangeState(StateMachine.StateName.Turning);
+			}
+		}
+
+		SetSpeed(_new_speed);
+	}
+
+	public void GetMovementInput_Aerial(bool restrictTurning = false)
+	{
+		_new_speed = _currentSpeed;
+		if (Input.GetKey(KeyCode.RightArrow))
+		{
+			float totalAcceleration = _acceleration;
+			float quickturnspeed = _aerialSpeed;
+			if (_currentSpeed < 0)
+			{
+				quickturnspeed = _aerialSpeed;
+			}
+
+			float speedUpperBound = _maxSpeed;
+			float speedLowerBound = -_maxSpeed;
+			speedUpperBound = _aerialSpeed;
+			speedLowerBound = -_aerialSpeed;
+			totalAcceleration = totalAcceleration * 2;
+
+			if (restrictTurning)
+			{
+				speedLowerBound = 0;
+			}
+			_new_speed = Mathf.Clamp((_currentSpeed + (totalAcceleration * Time.deltaTime)) + quickturnspeed, speedLowerBound, speedUpperBound);
+
+		}
+		else if (Input.GetKey(KeyCode.LeftArrow))
+		{
+			float totalAcceleration = _acceleration;
+			float quickturnspeed = 0;
+			if (_currentSpeed > 0)
+			{
+				quickturnspeed = _aerialSpeed;
+			}
+
+			float speedUpperBound = _maxSpeed;
+			float speedLowerBound = -_maxSpeed;
+
+			speedUpperBound = _aerialSpeed;
+			speedLowerBound = -_aerialSpeed;
+			totalAcceleration = totalAcceleration * 2;
+			if (restrictTurning)
+			{
+				speedUpperBound = 0;
+			}
+			_new_speed = Mathf.Clamp((_currentSpeed - (totalAcceleration * Time.deltaTime)) - quickturnspeed, speedLowerBound, speedUpperBound);
+		}
+		else if (!Input.GetKey(KeyCode.LeftArrow) && !Input.GetKey(KeyCode.RightArrow))
+		{
+			_new_speed = 0f;
+		}
+		else if (_currentSpeed != 0)
+		{
+
+			float relativeDecay = _speedDecay * Mathf.Sign(_currentSpeed);
+			_new_speed = Mathf.Clamp((_currentSpeed - (relativeDecay * Time.deltaTime)), -_maxSpeed, _maxSpeed);
+			if (_new_speed < _idleThreshold && _new_speed > -_idleThreshold)
+			{
+				_new_speed = 0f;
+			}
+		}
+
+		if (!restrictTurning && ((_facingDirection == Direction.Right && _new_speed < 0) || (_facingDirection == Direction.Left && _new_speed > 0)))
 		{
 			if (_new_speed != 0 && _stateMachine.CurrentState.name == StateMachine.StateName.Standing)
 			{
@@ -324,7 +376,6 @@ public class PlayerController : MonoBehaviour
 				_stateMachine.ChangeState(StateMachine.StateName.CrouchTurning);
 			}
 		}
-
 		SetSpeed(_new_speed);
 	}
 

@@ -15,7 +15,7 @@ public class JumpingState : State
 	{
 		base.DoFixedUpdate();
 
-		Player.GetMovementInput_Standing(aerial:true);
+		Player.GetMovementInput_Aerial();
 
 		if (Player._currentJumpingSpeed < (Player._hangingThreshold * Player._jumpSpeed))
 		{
