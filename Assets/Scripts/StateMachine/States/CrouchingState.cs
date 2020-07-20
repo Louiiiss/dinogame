@@ -7,7 +7,8 @@ public class CrouchingState : State
 	public override void Enter()
 	{
 		base.Enter();
-		//Player.CorrectFacingDirection();
+		Player.CorrectFacingDirection();
+		Player.ClampCurrentSpeedToNewMax(Player._maxCrouchSpeed);
 	}
 
 	public override void DoFixedUpdate()

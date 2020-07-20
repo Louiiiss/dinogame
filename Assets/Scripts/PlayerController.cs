@@ -30,6 +30,7 @@ public class PlayerController : MonoBehaviour
 
 	public float _maxHealth;
 	public float _maxSpeed;
+	public float _maxCrouchSpeed;
 	public float _acceleration;
 	public float _speedDecay;
 	public float _jumpSpeed;
@@ -334,8 +335,8 @@ public class PlayerController : MonoBehaviour
 				totalAcceleration += _speedDecay;
 			}
 
-			float speedUpperBound = _maxSpeed;
-			float speedLowerBound = -_maxSpeed;
+			float speedUpperBound = _maxCrouchSpeed;
+			float speedLowerBound = -_maxCrouchSpeed;
 
 			_new_speed = Mathf.Clamp((_currentSpeed + (totalAcceleration * Time.deltaTime)), speedLowerBound, speedUpperBound);
 
@@ -349,8 +350,8 @@ public class PlayerController : MonoBehaviour
 
 			}
 
-			float speedUpperBound = _maxSpeed;
-			float speedLowerBound = -_maxSpeed;
+			float speedUpperBound = _maxCrouchSpeed;
+			float speedLowerBound = -_maxCrouchSpeed;
 			_new_speed = Mathf.Clamp((_currentSpeed - (totalAcceleration * Time.deltaTime)), speedLowerBound, speedUpperBound);
 		}
 		else if (_currentSpeed != 0)
@@ -495,5 +496,11 @@ public class PlayerController : MonoBehaviour
 	public void DisableContainerRootMotion()
 	{
 		_updateContainerRootMotion = false;
+	}
+
+	public void ClampCurrentSpeedToNewMax(float max)
+	{
+		float clampedSpeed = Mathf.Clamp(_currentSpeed, -max, max);
+		SetSpeed(clampedSpeed);
 	}
 }
