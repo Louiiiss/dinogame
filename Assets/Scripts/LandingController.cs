@@ -7,6 +7,7 @@ public class LandingController : MonoBehaviour
 
 	public delegate void TriggerAction();
 	public event TriggerAction TriggerLanding;
+	public event TriggerAction CancelTriggerLanding;
 	public event TriggerAction TriggerFalling;
 
 	private void OnTriggerEnter(Collider other)
@@ -17,5 +18,6 @@ public class LandingController : MonoBehaviour
 	private void OnTriggerExit(Collider other)
 	{
 		TriggerFalling();
+		CancelTriggerLanding();
 	}
 }

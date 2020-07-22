@@ -25,5 +25,6 @@ public class FallingState : State
 	public override void Exit()
 	{
 		Player._playerAnimator.SetBool("Falling", false);
+		Player.StopFallingCheck();
 	}
 }

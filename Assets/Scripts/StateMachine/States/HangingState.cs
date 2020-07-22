@@ -30,6 +30,7 @@ public class HangingState : State
 	public override void Exit()
 	{
 		base.Exit();
+		Debug.Log("Exiting");
 		Player._playerAnimator.SetBool("Hanging", false);
 	}
 

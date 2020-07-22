@@ -46,6 +46,8 @@ public class PlayerController : MonoBehaviour
 	public GameObject _landingCollider;
 	public GameObject _eatingCollider;
 
+	private bool _checkForLanding;
+	private bool _checkForFalling;
 
 	public delegate void UIUpdateAction();
 	public event UIUpdateAction TriggerUIUpdate;
@@ -84,6 +86,8 @@ public class PlayerController : MonoBehaviour
 	{
 		CharacterFrameContainer = this.transform.parent;
 		_facingDirection = Direction.Right;
+		_checkForLanding = false;
+		_checkForFalling = true;
 		CorrectFacingDirection();
 		InitialiseStateMachine();
 
@@ -111,18 +115,29 @@ public class PlayerController : MonoBehaviour
 
 		_landingController.TriggerLanding += TriggerLanding;
 		_landingController.TriggerFalling += TriggerFalling;
+		_landingController.CancelTriggerLanding += StopLandingCheck;
 	}
 
 	private void OnDisable()
 	{
 		_landingController.TriggerLanding -= TriggerLanding;
 		_landingController.TriggerFalling -= TriggerFalling;
+		_landingController.CancelTriggerLanding -= StopLandingCheck;
 	}
 
 	private void Update()
 	{
 		GetGenericInformation();
 		_stateMachine.UpdateCurrentState();
+
+		if(_checkForLanding)
+		{
+			TryPerformLanding();
+		}	
+		if(_checkForFalling)
+		{
+			TryPerformFalling();
+		}
 	}
 
 	private void FixedUpdate()
@@ -467,19 +482,41 @@ public class PlayerController : MonoBehaviour
 	private void TriggerLanding()
 	{
 		Debug.Log("Landing");
-		if (_stateMachine.CurrentState.name == StateMachine.StateName.Standing || _stateMachine.CurrentState.name == StateMachine.StateName.Hanging || _stateMachine.CurrentState.name == StateMachine.StateName.Falling)
+		_checkForLanding = true;
+	}
+
+	private void TryPerformLanding()
+	{
+		AnimatorStateInfo stateInfo = _playerAnimator.GetCurrentAnimatorStateInfo(0);
+		if (stateInfo.IsName("Hanging") || stateInfo.IsName("Falling"))
 		{
 			_stateMachine.ChangeState(StateMachine.StateName.Landing);
 		}
 	}
 
+	public void StopLandingCheck()
+	{
+		_checkForLanding = false;
+	}
+
 	private void TriggerFalling()
 	{
 		Debug.Log("Falling");
-		if (_stateMachine.CurrentState.name == StateMachine.StateName.Standing || _stateMachine.CurrentState.name == StateMachine.StateName.Hanging || _stateMachine.CurrentState.name == StateMachine.StateName.Landing)
+		_checkForFalling = true;
+	}
+
+	private void TryPerformFalling()
+	{
+		AnimatorStateInfo stateInfo = _playerAnimator.GetCurrentAnimatorStateInfo(0);
+		if (stateInfo.IsName("Standing Blend Tree") || stateInfo.IsName("Crouching Blend Tree"))
 		{
 			_stateMachine.ChangeState(StateMachine.StateName.Falling);
 		}
+	}
+	
+	public void StopFallingCheck()
+	{
+		_checkForFalling = false;
 	}
 
 	private void TakeDamage(float amount)

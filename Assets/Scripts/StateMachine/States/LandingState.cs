@@ -8,6 +8,7 @@ public class LandingState : State
 	{
 		Player._rigidbody.useGravity = true;
 		Player._playerAnimator.SetBool("Landing", true);
+		Player.StopFallingCheck();
 	}
 
 	public override void DoUpdate()
@@ -31,5 +32,6 @@ public class LandingState : State
 	{
 		base.Exit();
 		Player._playerAnimator.SetBool("Landing", false);
+		Player.StopLandingCheck();
 	}
 }
