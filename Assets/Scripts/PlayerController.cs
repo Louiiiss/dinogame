@@ -406,6 +406,11 @@ public class PlayerController : MonoBehaviour
 		{
 			TakeDamage(-10f);
 		}
+
+		if(Input.GetKeyDown(KeyCode.E))
+		{
+			Rest();
+		}
 	}
 
 	//// Actions
@@ -430,6 +435,16 @@ public class PlayerController : MonoBehaviour
 	{
 		// Do eating logic
 		_stateMachine.ChangeState(StateMachine.StateName.Attacking);
+	}
+
+	private void Rest()
+	{
+		_stateMachine.ChangeState(StateMachine.StateName.Resting);
+	}
+
+	public void EndResting()
+	{
+		_stateMachine.ChangeState(StateMachine.StateName.EndResting);
 	}
 
 	public void Turn()
@@ -471,6 +486,12 @@ public class PlayerController : MonoBehaviour
 	{
 		_currentHealth = Mathf.Clamp(_currentHealth - amount, 0, _maxHealth);
 		Debug.Log(_currentHealth);
+		TriggerUIUpdate();
+	}
+
+	public void RestoreToFullHealth()
+	{
+		_currentHealth = _maxHealth;
 		TriggerUIUpdate();
 	}
 

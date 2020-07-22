@@ -29,6 +29,8 @@ public class StateMachine : MonoBehaviour
 		Crouching,
 		StandingUp,
 		CrouchTurning,
+		Resting,
+		EndResting,
 		None
 	}
 
