@@ -23,6 +23,8 @@ public class PlayerController : MonoBehaviour
 	[HideInInspector]
 	public EatingController _eatingController;
 	[HideInInspector]
+	public AttackingController _attackingController;
+	[HideInInspector]
 	public Rigidbody _rigidbody;
 	[HideInInspector]
 	public Direction _facingDirection;
@@ -45,6 +47,8 @@ public class PlayerController : MonoBehaviour
 	public float _aerialSpeed;
 	public GameObject _landingCollider;
 	public GameObject _eatingCollider;
+	public GameObject _attackingCollider;
+	public float _baseAttackDamage;
 
 	private bool _checkForLanding;
 	private bool _checkForFalling;
@@ -71,13 +75,13 @@ public class PlayerController : MonoBehaviour
 
 		foreach (StateMachine.StateInfo info in _states)
 		{
-			if(info.state != null)
+			if (info.state != null)
 			{
 				info.state.Init(this, _stateMachine);
 				stateDictionary[info.name] = info.state;
 			}
 		}
-		
+
 		_stateMachine.Initialize(stateDictionary, StateMachine.StateName.Standing, this);
 	}
 
@@ -97,6 +101,7 @@ public class PlayerController : MonoBehaviour
 		_rigidbody = CharacterFrameContainer.GetComponent<Rigidbody>();
 
 		InitialisePlayerStats();
+		_attackingController.SetDamageValue(_baseAttackDamage);
 	}
 
 	private void InitialisePlayerStats()
@@ -112,10 +117,12 @@ public class PlayerController : MonoBehaviour
 		_playerAnimator = this.GetComponent<Animator>();
 		_landingController = _landingCollider.GetComponent<LandingController>();
 		_eatingController = _eatingCollider.GetComponent<EatingController>();
+		_attackingController = _attackingCollider.GetComponent<AttackingController>();
 
 		_landingController.TriggerLanding += TriggerLanding;
 		_landingController.TriggerFalling += TriggerFalling;
 		_landingController.CancelTriggerLanding += StopLandingCheck;
+		_eatingController.TriggerHealing += Heal;
 	}
 
 	private void OnDisable()
@@ -123,6 +130,7 @@ public class PlayerController : MonoBehaviour
 		_landingController.TriggerLanding -= TriggerLanding;
 		_landingController.TriggerFalling -= TriggerFalling;
 		_landingController.CancelTriggerLanding -= StopLandingCheck;
+		_eatingController.TriggerHealing -= Heal;
 	}
 
 	private void Update()
@@ -130,11 +138,11 @@ public class PlayerController : MonoBehaviour
 		GetGenericInformation();
 		_stateMachine.UpdateCurrentState();
 
-		if(_checkForLanding)
+		if (_checkForLanding)
 		{
 			TryPerformLanding();
-		}	
-		if(_checkForFalling)
+		}
+		if (_checkForFalling)
 		{
 			TryPerformFalling();
 		}
@@ -146,7 +154,7 @@ public class PlayerController : MonoBehaviour
 	}
 
 	//// State Transitions
-	
+
 	public void CorrectFacingDirection()
 	{
 		Vector3 correctedDirection;
@@ -154,7 +162,7 @@ public class PlayerController : MonoBehaviour
 		if (_facingDirection == Direction.Left)
 		{
 			correctedDirection = new Vector3(_currentRotation.x, -180, _currentRotation.z);
-}
+		}
 		else
 		{
 			correctedDirection = new Vector3(_currentRotation.x, 0, _currentRotation.z);
@@ -172,7 +180,7 @@ public class PlayerController : MonoBehaviour
 		_playerAnimator.SetFloat("Speed", Mathf.Abs(_currentSpeed));
 		_currentPostion = this.transform.position;
 		Vector3 newPosition = _currentPostion + (CharacterFrameContainer.forward * _currentSpeed * Time.fixedDeltaTime); //_currentPostion + new Vector3(_currentSpeed * Time.fixedDeltaTime, 0f, 0f);
-		//this.transform.position = newPosition;
+																														 //this.transform.position = newPosition;
 		_rigidbody.MovePosition(newPosition);
 	}
 
@@ -188,7 +196,7 @@ public class PlayerController : MonoBehaviour
 		_currentRotation = this.transform.rotation.eulerAngles;
 	}
 
-	public void GetMovementInput_Standing(bool restrictTurning=false)
+	public void GetMovementInput_Standing(bool restrictTurning = false)
 	{
 		_new_speed = _currentSpeed;
 		if (Input.GetKey(KeyCode.RightArrow))
@@ -206,7 +214,7 @@ public class PlayerController : MonoBehaviour
 
 			float speedUpperBound = _maxSpeed;
 			float speedLowerBound = -_maxSpeed;
-			
+
 			if (restrictTurning)
 			{
 				speedLowerBound = 0;
@@ -251,7 +259,7 @@ public class PlayerController : MonoBehaviour
 			}
 		}
 
-		if(Input.GetKey(KeyCode.DownArrow))
+		if (Input.GetKey(KeyCode.DownArrow))
 		{
 			_stateMachine.ChangeState(StateMachine.StateName.CrouchingDown);
 		}
@@ -403,7 +411,7 @@ public class PlayerController : MonoBehaviour
 			StartCoroutine("Jump");
 		}
 
-		if(Input.GetKeyDown(KeyCode.C))
+		if (Input.GetKeyDown(KeyCode.C))
 		{
 			Eat();
 		}
@@ -413,7 +421,7 @@ public class PlayerController : MonoBehaviour
 			Attack();
 		}
 
-		if(Input.GetKeyDown(KeyCode.J))
+		if (Input.GetKeyDown(KeyCode.J))
 		{
 			TakeDamage(10f);
 		}
@@ -422,7 +430,7 @@ public class PlayerController : MonoBehaviour
 			TakeDamage(-10f);
 		}
 
-		if(Input.GetKeyDown(KeyCode.E))
+		if (Input.GetKeyDown(KeyCode.E))
 		{
 			Rest();
 		}
@@ -440,10 +448,6 @@ public class PlayerController : MonoBehaviour
 	{
 		// Do eating logic
 		_stateMachine.ChangeState(StateMachine.StateName.Eating);
-		if(_eatingController._foodInRange)
-		{
-			TakeDamage(-10f);
-		}
 	}
 
 	private void Attack()
@@ -513,15 +517,22 @@ public class PlayerController : MonoBehaviour
 			_stateMachine.ChangeState(StateMachine.StateName.Falling);
 		}
 	}
-	
+
 	public void StopFallingCheck()
 	{
 		_checkForFalling = false;
 	}
 
-	private void TakeDamage(float amount)
+	public void TakeDamage(float amount)
 	{
 		_currentHealth = Mathf.Clamp(_currentHealth - amount, 0, _maxHealth);
+		Debug.Log(_currentHealth);
+		TriggerUIUpdate();
+	}
+
+	public void Heal(float amount)
+	{
+		_currentHealth = Mathf.Clamp(_currentHealth + amount, 0, _maxHealth);
 		Debug.Log(_currentHealth);
 		TriggerUIUpdate();
 	}
