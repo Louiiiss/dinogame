@@ -16,7 +16,7 @@ public class HangingState : State
 
 		Player.GetMovementInput_Aerial();
 
-		if (Player._currentJumpingSpeed > -(Player._hangingThreshold * Player._jumpSpeed))
+		if (Player._currentJumpingSpeed > -(Player._hangingThreshold * Player._hangTimeJumpSpeed))
 		{
 			Vector3 newPosition = Player._currentPostion + new Vector3(Player._currentSpeed * Time.deltaTime, ((Player._currentJumpingSpeed / 3) * Time.deltaTime), 0f);
 			Player.UpdateJump(newPosition);

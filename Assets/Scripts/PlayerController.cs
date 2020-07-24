@@ -35,7 +35,7 @@ public class PlayerController : MonoBehaviour
 	public float _maxCrouchSpeed;
 	public float _acceleration;
 	public float _speedDecay;
-	public float _jumpSpeed;
+	public float _hangTimeJumpSpeed;
 	public float _jumpDecay;
 	public float _maxFallSpeed;
 	public float _idleThreshold;
@@ -180,14 +180,14 @@ public class PlayerController : MonoBehaviour
 		_playerAnimator.SetFloat("Speed", Mathf.Abs(_currentSpeed));
 		_currentPostion = this.transform.position;
 		Vector3 newPosition = _currentPostion + (CharacterFrameContainer.forward * _currentSpeed * Time.fixedDeltaTime); //_currentPostion + new Vector3(_currentSpeed * Time.fixedDeltaTime, 0f, 0f);
-																														 //this.transform.position = newPosition;
 		_rigidbody.MovePosition(newPosition);
+
 	}
 
 	public void UpdateJump(Vector3 newPosition)
 	{
 		_rigidbody.MovePosition(newPosition);
-		_currentJumpingSpeed = Mathf.Clamp(_currentJumpingSpeed - (_jumpDecay * Time.fixedDeltaTime), -_maxFallSpeed, _jumpSpeed);
+		_currentJumpingSpeed = Mathf.Clamp(_currentJumpingSpeed - (_jumpDecay * Time.fixedDeltaTime), -_maxFallSpeed, _hangTimeJumpSpeed);
 	}
 
 	private void GetGenericInformation()
@@ -440,8 +440,9 @@ public class PlayerController : MonoBehaviour
 	private void Jump()
 	{
 		_playerAnimator.SetBool("Jumping", true);
-		IEnumerator coroutine = _stateMachine.ChangeStateAfterDelay(StateMachine.StateName.Jumping, 0.2f);
-		StartCoroutine(coroutine);
+		//IEnumerator coroutine = _stateMachine.ChangeStateAfterDelay(StateMachine.StateName.Jumping, 0.2f);
+		//StartCoroutine(coroutine);
+		_stateMachine.ChangeState(StateMachine.StateName.Jumping);
 	}
 
 	private void Eat()
