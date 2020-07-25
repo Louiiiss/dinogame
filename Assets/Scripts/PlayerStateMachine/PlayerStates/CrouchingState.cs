@@ -19,6 +19,10 @@ public class CrouchingState : State
 	public override void DoUpdate()
 	{
 		base.DoUpdate();
+		if (Input.GetKeyDown(KeyCode.Z))
+		{
+			Player.Attack();
+		}
 		//Player.GetActionInput();
 	}
 }

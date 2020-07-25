@@ -451,7 +451,7 @@ public class PlayerController : MonoBehaviour
 		_stateMachine.ChangeState(StateMachine.StateName.Eating);
 	}
 
-	private void Attack()
+	public void Attack()
 	{
 		// Do eating logic
 		_stateMachine.ChangeState(StateMachine.StateName.Attacking);
