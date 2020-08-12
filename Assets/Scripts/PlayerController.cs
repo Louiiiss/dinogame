@@ -1,9 +1,15 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using PathCreation;
 
 public class PlayerController : MonoBehaviour
 {
+	[HideInInspector]
+	public bool _followingPath;
+	public PathCreator _currentPath;
+	float _pathProgress = 0;
+
 	[HideInInspector]
 	public float _currentHealth;
 	[HideInInspector]
@@ -15,7 +21,7 @@ public class PlayerController : MonoBehaviour
 	[HideInInspector]
 	public Animator _playerAnimator;
 	[HideInInspector]
-	public Vector3 _currentPostion;
+	public Vector3 _currentPosition;
 	[HideInInspector]
 	public Vector3 _currentRotation;
 	[HideInInspector]
@@ -102,6 +108,8 @@ public class PlayerController : MonoBehaviour
 
 		InitialisePlayerStats();
 		_attackingController.SetDamageValue(_baseAttackDamage);
+
+		_followingPath = false;
 	}
 
 	private void InitialisePlayerStats()
@@ -172,27 +180,57 @@ public class PlayerController : MonoBehaviour
 
 	}
 
+	
 
 	// Utilities
 	public void SetSpeed(float speed)
 	{
 		_currentSpeed = speed;
 		_playerAnimator.SetFloat("Speed", Mathf.Abs(_currentSpeed));
-		_currentPostion = this.transform.position;
-		Vector3 newPosition = _currentPostion + (CharacterFrameContainer.forward * _currentSpeed * Time.fixedDeltaTime); //_currentPostion + new Vector3(_currentSpeed * Time.fixedDeltaTime, 0f, 0f);
-		_rigidbody.MovePosition(newPosition);
+		_currentPosition = this.transform.position;
+		Vector3 newPosition;
+		if (_followingPath)
+		{
+			float distance_to_move = _currentSpeed * Time.fixedDeltaTime * 0.66f;
+			_pathProgress += distance_to_move;
+			
+			Debug.Log("Closest Position: " + _currentPath.path.GetClosestDistanceAlongPath(_currentPosition).ToString());
 
+			if (_pathProgress >= _currentPath.path.length || _pathProgress < 0)
+			{
+				_followingPath = false;
+				newPosition = _currentPosition + (CharacterFrameContainer.forward * _currentSpeed * Time.fixedDeltaTime);
+				_rigidbody.MovePosition(newPosition);
+			}
+			else
+			{
+				newPosition = new Vector3(_currentPath.path.GetPointAtDistance(_pathProgress).x, _rigidbody.position.y, _currentPath.path.GetPointAtDistance(_pathProgress).z);
+				_rigidbody.MovePosition(newPosition);
+				Debug.Log("new pos: " + newPosition.ToString());
+				Vector3 newRotation = new Vector3(_rigidbody.rotation.x, _currentPath.path.GetRotationAtDistance(_pathProgress).eulerAngles.y, _rigidbody.rotation.z);
+				CharacterFrameContainer.rotation = Quaternion.Euler(newRotation);
+			}
+		}
+		else
+		{
+			newPosition = _currentPosition + (CharacterFrameContainer.forward * _currentSpeed * Time.fixedDeltaTime);
+			_rigidbody.MovePosition(newPosition);
+		}
+
+		Debug.Log("Path progress " + _pathProgress.ToString());
+		_currentPosition = newPosition;
 	}
 
-	public void UpdateJump(Vector3 newPosition)
+	public void UpdateJump(float jumpSpeedModifier = 1.0f)
 	{
-		_rigidbody.MovePosition(newPosition);
+		Vector3 newJumpPosition = _currentPosition + new Vector3(0f, _currentJumpingSpeed * jumpSpeedModifier * Time.fixedDeltaTime,0f);
+		_rigidbody.MovePosition(newJumpPosition);
 		_currentJumpingSpeed = Mathf.Clamp(_currentJumpingSpeed - (_jumpDecay * Time.fixedDeltaTime), -_maxFallSpeed, _hangTimeJumpSpeed);
 	}
 
 	private void GetGenericInformation()
 	{
-		_currentPostion = this.transform.position;
+		_currentPosition = this.transform.position;
 		_currentRotation = this.transform.rotation.eulerAngles;
 	}
 
@@ -344,6 +382,7 @@ public class PlayerController : MonoBehaviour
 			}
 		}
 
+		Debug.Log("Setting speed from aerial " + _new_speed.ToString());
 		SetSpeed(_new_speed);
 	}
 
@@ -573,4 +612,21 @@ public class PlayerController : MonoBehaviour
 		float clampedSpeed = Mathf.Clamp(_currentSpeed, -max, max);
 		SetSpeed(clampedSpeed);
 	}
+
+	public void EnableFollowPath(PathCreator path, float startingPosition)
+	{
+		Debug.Log("Starting path at " + startingPosition.ToString());
+		_followingPath = true;
+		_currentPath = path;
+		//_rigidbody.MovePosition(new Vector3(_currentPath.path.GetPointAtDistance(startingPosition).x,_currentPostion.y, _currentPath.path.GetPointAtDistance(startingPosition).z));
+		_pathProgress = startingPosition;
+	}
+
+	public void DisableFollowPath()
+	{
+		_followingPath = false;
+		_currentPath = null;
+	}
+
+
 }

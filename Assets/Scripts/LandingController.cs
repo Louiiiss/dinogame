@@ -10,14 +10,27 @@ public class LandingController : MonoBehaviour
 	public event TriggerAction CancelTriggerLanding;
 	public event TriggerAction TriggerFalling;
 
+	private int _overlappingObjects = 0;
+
 	private void OnTriggerEnter(Collider other)
 	{
-		TriggerLanding();
+		if(other.gameObject.layer != LayerMask.NameToLayer("Sensors"))
+		{
+			_overlappingObjects++;
+			TriggerLanding();
+		}
 	}
 
 	private void OnTriggerExit(Collider other)
 	{
-		TriggerFalling();
-		CancelTriggerLanding();
+		if (other.gameObject.layer != LayerMask.NameToLayer("Sensors"))
+		{
+			_overlappingObjects--;
+			if(_overlappingObjects <= 0)
+			{
+				TriggerFalling();
+				CancelTriggerLanding();
+			}
+		}
 	}
 }

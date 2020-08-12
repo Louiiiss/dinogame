@@ -17,9 +17,7 @@ public class FallingState : State
 	{
 		base.DoFixedUpdate();
 		Player.GetMovementInput_Aerial();
-
-		Vector3 newPosition = Player._currentPostion + new Vector3(Player._currentSpeed * Time.fixedDeltaTime, (Player._currentJumpingSpeed * Time.fixedDeltaTime), 0f);
-		Player.UpdateJump(newPosition);
+		Player.UpdateJump();
 	}
 
 	public override void Exit()
