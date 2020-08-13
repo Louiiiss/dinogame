@@ -180,7 +180,7 @@ public class PlayerController : MonoBehaviour
 
 	}
 
-	
+	private float _cachedPathProgress;
 
 	// Utilities
 	public void SetSpeed(float speed)
@@ -192,9 +192,8 @@ public class PlayerController : MonoBehaviour
 		if (_followingPath)
 		{
 			float distance_to_move = _currentSpeed * Time.fixedDeltaTime * 0.66f;
+			_cachedPathProgress = _pathProgress;
 			_pathProgress += distance_to_move;
-			
-			Debug.Log("Closest Position: " + _currentPath.path.GetClosestDistanceAlongPath(_currentPosition).ToString());
 
 			if (_pathProgress >= _currentPath.path.length || _pathProgress < 0)
 			{
@@ -210,6 +209,15 @@ public class PlayerController : MonoBehaviour
 				Vector3 newRotation = new Vector3(_rigidbody.rotation.x, _currentPath.path.GetRotationAtDistance(_pathProgress).eulerAngles.y, _rigidbody.rotation.z);
 				CharacterFrameContainer.rotation = Quaternion.Euler(newRotation);
 			}
+
+			float path_progress2 = _currentPath.path.GetClosestDistanceAlongPath(_currentPosition) + distance_to_move;
+			if (Mathf.Abs(_pathProgress - path_progress2) > 0.15f)
+			{
+				_pathProgress = _cachedPathProgress;
+			}
+
+			Debug.Log("Path progress " + _pathProgress.ToString());
+			Debug.Log("Path Progress 2: " + path_progress2.ToString());
 		}
 		else
 		{
@@ -217,7 +225,7 @@ public class PlayerController : MonoBehaviour
 			_rigidbody.MovePosition(newPosition);
 		}
 
-		Debug.Log("Path progress " + _pathProgress.ToString());
+		
 		_currentPosition = newPosition;
 	}
 
@@ -589,7 +597,21 @@ public class PlayerController : MonoBehaviour
 	{
 		if(_updateContainerRootMotion)
 		{
-			CharacterFrameContainer.position += _playerAnimator.deltaPosition;
+			if(_followingPath && _stateMachine.CurrentState.name != StateMachine.StateName.Jumping)
+			{
+				Vector3 pathDelta = _currentPath.path.GetClosestPointOnPath(CharacterFrameContainer.position + _playerAnimator.deltaPosition) - _currentPath.path.GetClosestPointOnPath(CharacterFrameContainer.position);
+				Vector3 calculatedPathPosition = CharacterFrameContainer.position + _playerAnimator.deltaPosition;
+				_pathProgress = _currentPath.path.GetClosestDistanceAlongPath(calculatedPathPosition);
+				CharacterFrameContainer.position += pathDelta;
+				Vector3 newRotation = new Vector3(_rigidbody.rotation.x, _currentPath.path.GetRotationAtDistance(_pathProgress).eulerAngles.y, _rigidbody.rotation.z);
+				CharacterFrameContainer.rotation = Quaternion.Euler(newRotation);
+				//CharacterFrameContainer.rotation = _currentPath.path.GetRotationAtDistance(_pathProgress);
+			}
+			else
+			{
+				CharacterFrameContainer.position += _playerAnimator.deltaPosition;
+			}
+			
 		}
 		else
 		{
