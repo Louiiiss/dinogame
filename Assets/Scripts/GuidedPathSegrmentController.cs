@@ -10,6 +10,7 @@ public class GuidedPathSegrmentController : MonoBehaviour
 	public GameObject _entryGate;
 	public GameObject _exitGate;
 	public PathCreator _path;
+	PathCreator flattenedPath;
 
 	private bool _checkForPathJoin = false;
 	private string _cachedGateName;
@@ -21,6 +22,9 @@ public class GuidedPathSegrmentController : MonoBehaviour
 	{
 		_player = GameObject.Find("CharacterFrameContainer").GetComponentInChildren<PlayerController>();
 		_playerRadius = _player.gameObject.GetComponent<CapsuleCollider>().radius;
+		flattenedPath = _path;
+		flattenedPath.bezierPath.Space = PathSpace.xz;
+		flattenedPath.TriggerPathUpdate();
 	}
 
 	public void BindPathToGates()
@@ -68,8 +72,7 @@ public class GuidedPathSegrmentController : MonoBehaviour
 				_checkForPathJoin = true;
 			}
 		}
-		PathCreator flattenedPath = _path;
-		flattenedPath.bezierPath.Space = PathSpace.xz;
+		
 		if(canMoveToPath && !_player._followingPath)
 		{
 			_player.EnableFollowPath(flattenedPath, startingPosition);

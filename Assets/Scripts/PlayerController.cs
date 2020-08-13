@@ -209,8 +209,8 @@ public class PlayerController : MonoBehaviour
 				Vector3 newRotation = new Vector3(_rigidbody.rotation.x, _currentPath.path.GetRotationAtDistance(_pathProgress).eulerAngles.y, _rigidbody.rotation.z);
 				CharacterFrameContainer.rotation = Quaternion.Euler(newRotation);
 			}
-
-			float path_progress2 = _currentPath.path.GetClosestDistanceAlongPath(_currentPosition) + distance_to_move;
+			Vector3 normalized_height_position = new Vector3(_currentPosition.x, 0f, _currentPosition.z);
+			float path_progress2 = _currentPath.path.GetClosestDistanceAlongPath(normalized_height_position) + distance_to_move;
 			if (Mathf.Abs(_pathProgress - path_progress2) > 0.15f)
 			{
 				_pathProgress = _cachedPathProgress;
@@ -597,15 +597,19 @@ public class PlayerController : MonoBehaviour
 	{
 		if(_updateContainerRootMotion)
 		{
-			if(_followingPath && _stateMachine.CurrentState.name != StateMachine.StateName.Jumping)
+			if(_followingPath)
 			{
-				Vector3 pathDelta = _currentPath.path.GetClosestPointOnPath(CharacterFrameContainer.position + _playerAnimator.deltaPosition) - _currentPath.path.GetClosestPointOnPath(CharacterFrameContainer.position);
+				Vector3 closestPredictedPoint = _currentPath.path.GetClosestPointOnPath(CharacterFrameContainer.position);
+				Vector3 adjustedPrediction = new Vector3(closestPredictedPoint.x, CharacterFrameContainer.position.y, closestPredictedPoint.z);
+				Vector3 current_plus_delta = CharacterFrameContainer.position + _playerAnimator.deltaPosition;
+				Vector3 predicted_current_plus_delta_on_path = _currentPath.path.GetClosestPointOnPath(current_plus_delta);
+				Vector3 adjusted_predicted_current_plus_delta_on_path = new Vector3(predicted_current_plus_delta_on_path.x, current_plus_delta.y, predicted_current_plus_delta_on_path.z);
+				Vector3 pathDelta = adjusted_predicted_current_plus_delta_on_path - adjustedPrediction;
 				Vector3 calculatedPathPosition = CharacterFrameContainer.position + _playerAnimator.deltaPosition;
 				_pathProgress = _currentPath.path.GetClosestDistanceAlongPath(calculatedPathPosition);
 				CharacterFrameContainer.position += pathDelta;
 				Vector3 newRotation = new Vector3(_rigidbody.rotation.x, _currentPath.path.GetRotationAtDistance(_pathProgress).eulerAngles.y, _rigidbody.rotation.z);
 				CharacterFrameContainer.rotation = Quaternion.Euler(newRotation);
-				//CharacterFrameContainer.rotation = _currentPath.path.GetRotationAtDistance(_pathProgress);
 			}
 			else
 			{
