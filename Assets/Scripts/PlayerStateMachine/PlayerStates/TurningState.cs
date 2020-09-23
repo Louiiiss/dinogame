@@ -7,7 +7,6 @@ public class TurningState : State
 	public override void Enter()
 	{
 		base.Enter();
-		Player.DisableMatchGroundNormal();
 		Player.Turn();
 	}
 

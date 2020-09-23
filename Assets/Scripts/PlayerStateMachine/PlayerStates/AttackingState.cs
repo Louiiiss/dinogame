@@ -10,7 +10,7 @@ public class AttackingState : State
 		Player._playerAnimator.SetBool("Attacking", true);
 		Player.SetSpeed(0f);
 		Player.EnableContainerRootMotion();
-		//Player._rigidbody.useGravity = false;
+		Player._rigidbody.useGravity = false;
 	}
 
 	public override void DoUpdate()

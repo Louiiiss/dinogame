@@ -58,7 +58,6 @@ public class PlayerController : MonoBehaviour
 
 	private bool _checkForLanding;
 	private bool _checkForFalling;
-	private bool _matchGroundNormal;
 	private Quaternion _groundAdjustedHeading;
 
 	public delegate void UIUpdateAction();
@@ -110,7 +109,6 @@ public class PlayerController : MonoBehaviour
 
 		InitialisePlayerStats();
 		_attackingController.SetDamageValue(_baseAttackDamage);
-		DisableMatchGroundNormal();
 
 		_followingPath = false;
 	}
@@ -647,16 +645,6 @@ public class PlayerController : MonoBehaviour
 	{
 		_followingPath = false;
 		_currentPath = null;
-	}
-
-	public void EnableMatchGroundNormal()
-	{
-		_matchGroundNormal = true;
-	}
-
-	public void DisableMatchGroundNormal()
-	{
-		_matchGroundNormal = false;
 	}
 
 	public void MatchGroundNormal()

@@ -9,7 +9,6 @@ public class FallingState : State
 		base.Enter();
 		Player._rigidbody.useGravity = false;
 		Player._playerAnimator.SetBool("Falling", true);
-		Player.DisableMatchGroundNormal();
 	}
 
 	public override void DoFixedUpdate()

@@ -7,7 +7,7 @@ public class LandingState : State
 	public override void Enter()
 	{
 		Player._rigidbody.useGravity = true;
-		Player.EnableMatchGroundNormal();
+		Player.MatchGroundNormal();
 		Player._playerAnimator.SetBool("Landing", true);
 		Player.StopFallingCheck();
 	}

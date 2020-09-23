@@ -15,6 +15,7 @@ public class CrouchingState : State
 	{
 		base.DoFixedUpdate();
 		Player.GetMovementInput_Crouching();
+		Player.MatchGroundNormal();
 	}
 	public override void DoUpdate()
 	{
