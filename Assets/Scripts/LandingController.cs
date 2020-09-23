@@ -16,6 +16,7 @@ public class LandingController : MonoBehaviour
 	{
 		if(other.gameObject.layer != LayerMask.NameToLayer("Sensors"))
 		{
+			Debug.Log("Collision!");
 			_overlappingObjects++;
 			TriggerLanding();
 		}
@@ -25,6 +26,7 @@ public class LandingController : MonoBehaviour
 	{
 		if (other.gameObject.layer != LayerMask.NameToLayer("Sensors"))
 		{
+			Debug.Log("Leaving");
 			_overlappingObjects--;
 			if(_overlappingObjects <= 0)
 			{

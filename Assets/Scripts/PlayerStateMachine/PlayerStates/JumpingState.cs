@@ -7,6 +7,7 @@ public class JumpingState : State
 	public override void Enter()
 	{
 		base.Enter();
+		Player.DisableMatchGroundNormal();
 		Player._rigidbody.useGravity = false;
 		Player.EnableContainerRootMotion();
 		Player._currentJumpingSpeed = Player._hangTimeJumpSpeed;

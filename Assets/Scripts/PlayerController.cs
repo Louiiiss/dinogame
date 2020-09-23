@@ -58,6 +58,8 @@ public class PlayerController : MonoBehaviour
 
 	private bool _checkForLanding;
 	private bool _checkForFalling;
+	private bool _matchGroundNormal;
+	private Quaternion _groundAdjustedHeading;
 
 	public delegate void UIUpdateAction();
 	public event UIUpdateAction TriggerUIUpdate;
@@ -108,6 +110,7 @@ public class PlayerController : MonoBehaviour
 
 		InitialisePlayerStats();
 		_attackingController.SetDamageValue(_baseAttackDamage);
+		DisableMatchGroundNormal();
 
 		_followingPath = false;
 	}
@@ -165,19 +168,15 @@ public class PlayerController : MonoBehaviour
 
 	public void CorrectFacingDirection()
 	{
-		Vector3 correctedDirection;
-		float frame_rotation = CharacterFrameContainer.rotation.y;
 		if (_facingDirection == Direction.Left)
 		{
-			correctedDirection = new Vector3(_currentRotation.x, -180, _currentRotation.z);
+			this.transform.rotation = GetHeadingFromGroundNormal(-CharacterFrameContainer.right);
 		}
 		else
 		{
-			correctedDirection = new Vector3(_currentRotation.x, 0, _currentRotation.z);
+			this.transform.rotation = GetHeadingFromGroundNormal(CharacterFrameContainer.right);
 		}
-
-		this.transform.localRotation = Quaternion.Euler(correctedDirection);
-
+		
 	}
 
 	private float _cachedPathProgress;
@@ -187,11 +186,11 @@ public class PlayerController : MonoBehaviour
 	{
 		_currentSpeed = speed;
 		_playerAnimator.SetFloat("Speed", Mathf.Abs(_currentSpeed));
-		_currentPosition = this.transform.position;
+		_currentPosition = CharacterFrameContainer.position;
 		Vector3 newPosition;
 		if (_followingPath)
 		{
-			float distance_to_move = _currentSpeed * Time.fixedDeltaTime * 0.66f;
+			float distance_to_move = _currentSpeed * Time.fixedDeltaTime;
 			_cachedPathProgress = _pathProgress;
 			_pathProgress += distance_to_move;
 
@@ -389,8 +388,6 @@ public class PlayerController : MonoBehaviour
 				_stateMachine.ChangeState(StateMachine.StateName.Turning);
 			}
 		}
-
-		Debug.Log("Setting speed from aerial " + _new_speed.ToString());
 		SetSpeed(_new_speed);
 	}
 
@@ -591,8 +588,6 @@ public class PlayerController : MonoBehaviour
 		TriggerUIUpdate();
 	}
 
-	//private void OnColl
-
 	private void OnAnimatorMove()
 	{
 		if(_updateContainerRootMotion)
@@ -654,5 +649,32 @@ public class PlayerController : MonoBehaviour
 		_currentPath = null;
 	}
 
+	public void EnableMatchGroundNormal()
+	{
+		_matchGroundNormal = true;
+	}
 
+	public void DisableMatchGroundNormal()
+	{
+		_matchGroundNormal = false;
+	}
+
+	public void MatchGroundNormal()
+	{	
+			this.transform.rotation = Quaternion.Lerp(this.transform.rotation, GetHeadingFromGroundNormal(this.transform.right), 0.2f + Time.deltaTime);
+	}
+
+	public Quaternion GetHeadingFromGroundNormal(Vector3 fwd)
+	{
+		RaycastHit hit;
+		if (Physics.Raycast(CharacterFrameContainer.transform.position + new Vector3(0, 0.2f, 0), Vector3.down, out hit, 10))
+		{
+			Debug.DrawRay(hit.point, hit.normal * 2f, Color.magenta);
+			Debug.Log("Hit!");
+			Vector3 heading = Vector3.Cross(fwd, hit.normal);
+			Debug.DrawRay(hit.point, heading, Color.red);
+			_groundAdjustedHeading = Quaternion.LookRotation(heading, hit.normal);
+		}
+		return _groundAdjustedHeading;
+	}
 }

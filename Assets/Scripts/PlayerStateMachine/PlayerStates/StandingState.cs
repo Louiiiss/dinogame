@@ -14,6 +14,7 @@ public class StandingState : State
 	{
 		base.DoFixedUpdate();
 		Player.GetMovementInput_Standing();
+		Player.MatchGroundNormal();
 	}
 	public override void DoUpdate()
 	{
