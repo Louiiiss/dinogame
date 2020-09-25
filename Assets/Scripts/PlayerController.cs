@@ -131,6 +131,7 @@ public class PlayerController : MonoBehaviour
 		_landingController.TriggerLanding += TriggerLanding;
 		_landingController.TriggerFalling += TriggerFalling;
 		_landingController.CancelTriggerLanding += StopLandingCheck;
+		_landingController.CancelTriggerFalling += StopFallingCheck;
 		_eatingController.TriggerHealing += Heal;
 	}
 
@@ -139,6 +140,7 @@ public class PlayerController : MonoBehaviour
 		_landingController.TriggerLanding -= TriggerLanding;
 		_landingController.TriggerFalling -= TriggerFalling;
 		_landingController.CancelTriggerLanding -= StopLandingCheck;
+		_landingController.CancelTriggerFalling -= StopFallingCheck;
 		_eatingController.TriggerHealing -= Heal;
 	}
 
@@ -202,7 +204,6 @@ public class PlayerController : MonoBehaviour
 			{
 				newPosition = new Vector3(_currentPath.path.GetPointAtDistance(_pathProgress).x, _rigidbody.position.y, _currentPath.path.GetPointAtDistance(_pathProgress).z);
 				_rigidbody.MovePosition(newPosition);
-				Debug.Log("new pos: " + newPosition.ToString());
 				Vector3 newRotation = new Vector3(_rigidbody.rotation.x, _currentPath.path.GetRotationAtDistance(_pathProgress).eulerAngles.y, _rigidbody.rotation.z);
 				CharacterFrameContainer.rotation = Quaternion.Euler(newRotation);
 			}
@@ -212,9 +213,6 @@ public class PlayerController : MonoBehaviour
 			{
 				_pathProgress = _cachedPathProgress;
 			}
-
-			Debug.Log("Path progress " + _pathProgress.ToString());
-			Debug.Log("Path Progress 2: " + path_progress2.ToString());
 		}
 		else
 		{
@@ -554,6 +552,7 @@ public class PlayerController : MonoBehaviour
 
 	private void TryPerformFalling()
 	{
+		Debug.Log("Trying to fall");
 		AnimatorStateInfo stateInfo = _playerAnimator.GetCurrentAnimatorStateInfo(0);
 		if (stateInfo.IsName("Standing Blend Tree") || stateInfo.IsName("Crouching Blend Tree"))
 		{
@@ -563,6 +562,7 @@ public class PlayerController : MonoBehaviour
 
 	public void StopFallingCheck()
 	{
+		Debug.Log("stopping falling check");
 		_checkForFalling = false;
 	}
 
@@ -649,7 +649,7 @@ public class PlayerController : MonoBehaviour
 
 	public void MatchGroundNormal()
 	{	
-			this.transform.rotation = Quaternion.Lerp(this.transform.rotation, GetHeadingFromGroundNormal(this.transform.right), 0.2f + Time.deltaTime);
+		this.transform.rotation = Quaternion.Lerp(this.transform.rotation, GetHeadingFromGroundNormal(this.transform.right), 0.2f + Time.deltaTime);
 	}
 
 	public Quaternion GetHeadingFromGroundNormal(Vector3 fwd)
@@ -658,7 +658,6 @@ public class PlayerController : MonoBehaviour
 		if (Physics.Raycast(CharacterFrameContainer.transform.position + new Vector3(0, 0.2f, 0), Vector3.down, out hit, 10))
 		{
 			Debug.DrawRay(hit.point, hit.normal * 2f, Color.magenta);
-			Debug.Log("Hit!");
 			Vector3 heading = Vector3.Cross(fwd, hit.normal);
 			Debug.DrawRay(hit.point, heading, Color.red);
 			_groundAdjustedHeading = Quaternion.LookRotation(heading, hit.normal);

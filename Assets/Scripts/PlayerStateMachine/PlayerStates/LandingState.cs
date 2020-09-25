@@ -7,7 +7,6 @@ public class LandingState : State
 	public override void Enter()
 	{
 		Player._rigidbody.useGravity = true;
-		Player.MatchGroundNormal();
 		Player._playerAnimator.SetBool("Landing", true);
 		Player.StopFallingCheck();
 	}
@@ -27,6 +26,7 @@ public class LandingState : State
 	{
 		base.DoFixedUpdate();
 		Player.GetMovementInput_Standing(restrictTurning: true);
+		Player.MatchGroundNormal();
 	}
 
 	public override void Exit()
