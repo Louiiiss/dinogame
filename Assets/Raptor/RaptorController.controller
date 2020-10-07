@@ -549,10 +549,10 @@ BlendTree:
   m_Name: Blend Tree
   m_Childs:
   - serializedVersion: 2
-    m_Motion: {fileID: 7400000, guid: 41718ebea5532644fa16a602f4e7dc5d, type: 2}
+    m_Motion: {fileID: 7400000, guid: d7f4d2d286b5a87449d297103754bb0a, type: 2}
     m_Threshold: 0
     m_Position: {x: 0, y: 0}
-    m_TimeScale: 5
+    m_TimeScale: 1
     m_CycleOffset: 0
     m_DirectBlendParameter: Speed
     m_Mirror: 0
@@ -1395,6 +1395,9 @@ AnimatorStateMachine:
   - serializedVersion: 1
     m_State: {fileID: -3727706122617061724}
     m_Position: {x: 690, y: 640, z: 0}
+  - serializedVersion: 1
+    m_State: {fileID: 2067015741787040350}
+    m_Position: {x: 725, y: 705, z: 0}
   m_ChildStateMachines: []
   m_AnyStateTransitions: []
   m_EntryTransitions: []
@@ -1476,6 +1479,32 @@ AnimatorState:
   m_CycleOffsetParameterActive: 0
   m_TimeParameterActive: 0
   m_Motion: {fileID: 7400000, guid: 5c520442aa2ec1c4f8b2913c79e60e1c, type: 2}
+  m_Tag: 
+  m_SpeedParameter: 
+  m_MirrorParameter: 
+  m_CycleOffsetParameter: 
+  m_TimeParameter: 
+--- !u!1102 &2067015741787040350
+AnimatorState:
+  serializedVersion: 5
+  m_ObjectHideFlags: 1
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_Name: landing_shallow
+  m_Speed: 1
+  m_CycleOffset: 0
+  m_Transitions: []
+  m_StateMachineBehaviours: []
+  m_Position: {x: 50, y: 50, z: 0}
+  m_IKOnFeet: 0
+  m_WriteDefaultValues: 1
+  m_Mirror: 0
+  m_SpeedParameterActive: 0
+  m_MirrorParameterActive: 0
+  m_CycleOffsetParameterActive: 0
+  m_TimeParameterActive: 0
+  m_Motion: {fileID: 7400000, guid: d7f4d2d286b5a87449d297103754bb0a, type: 2}
   m_Tag: 
   m_SpeedParameter: 
   m_MirrorParameter: 
@@ -1991,8 +2020,8 @@ AnimatorStateTransition:
   m_Mute: 0
   m_IsExit: 0
   serializedVersion: 3
-  m_TransitionDuration: 0.1653674
-  m_TransitionOffset: 0.4152047
+  m_TransitionDuration: 0.16536736
+  m_TransitionOffset: 0.3333334
   m_ExitTime: 0.75000006
   m_HasExitTime: 0
   m_HasFixedDuration: 1
@@ -2431,9 +2460,9 @@ AnimatorStateTransition:
   m_Mute: 0
   m_IsExit: 0
   serializedVersion: 3
-  m_TransitionDuration: 0.38672063
-  m_TransitionOffset: 0
-  m_ExitTime: 6.5740385e-10
+  m_TransitionDuration: 0.19050264
+  m_TransitionOffset: 0.19649144
+  m_ExitTime: 0.84647167
   m_HasExitTime: 0
   m_HasFixedDuration: 1
   m_InterruptionSource: 0
