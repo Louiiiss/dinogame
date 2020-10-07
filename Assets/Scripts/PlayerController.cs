@@ -224,7 +224,12 @@ public class PlayerController : MonoBehaviour
 		_currentPosition = newPosition;
 	}
 
-	public void UpdateJump(float jumpSpeedModifier = 1.0f)
+	public void SetFallMagnitude(float magnitude)
+	{
+		_playerAnimator.SetFloat("FallMagnitude", Mathf.Abs(magnitude));
+	}
+
+		public void UpdateJump(float jumpSpeedModifier = 1.0f)
 	{
 		Vector3 newJumpPosition = _currentPosition + new Vector3(0f, _currentJumpingSpeed * jumpSpeedModifier * Time.fixedDeltaTime,0f);
 		_rigidbody.MovePosition(newJumpPosition);
